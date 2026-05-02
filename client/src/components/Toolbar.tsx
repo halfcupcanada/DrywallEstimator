@@ -13,9 +13,11 @@ import {
   ZoomOut,
   RotateCcw,
   Upload,
+  Ruler,
 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
+import type { CalibrationState } from "./ScaleCalibrator";
 
 const TOOLS: { id: ToolType; icon: React.ReactNode; label: string; shortcut: string }[] = [
   { id: "select", icon: <MousePointer2 size={18} />, label: "Select", shortcut: "S" },
@@ -23,13 +25,17 @@ const TOOLS: { id: ToolType; icon: React.ReactNode; label: string; shortcut: str
   { id: "pan", icon: <Hand size={18} />, label: "Pan", shortcut: "P" },
 ];
 
-export default function Toolbar() {
+interface Props {
+  calibrationState: CalibrationState;
+  onStartCalibration: () => void;
+}
+
+export default function Toolbar({ calibrationState, onStartCalibration }: Props) {
   const {
     activeTool,
     setActiveTool,
     clearWalls,
     setFloorPlan,
-    clearFloorPlan,
     viewport,
     setViewport,
   } = useDrawingStore();
@@ -42,19 +48,16 @@ export default function Toolbar() {
     const url = URL.createObjectURL(file);
     const img = new window.Image();
     img.onload = () => {
-      // Fit floor plan to a reasonable canvas size (max 1200px wide)
       const maxW = 1200;
       const ratio = Math.min(1, maxW / img.naturalWidth);
       setFloorPlan(url, {
         width: img.naturalWidth * ratio,
         height: img.naturalHeight * ratio,
       });
-      // Reset viewport to show the image
       setViewport({ x: 40, y: 40, scale: 1 });
       toast.success("Floor plan loaded");
     };
     img.src = url;
-    // Reset input so same file can be re-uploaded
     e.target.value = "";
   };
 
@@ -70,6 +73,8 @@ export default function Toolbar() {
       toast.info("All walls cleared");
     }
   };
+
+  const isCalibrating = calibrationState !== "idle";
 
   return (
     <aside className="flex flex-col items-center gap-1 w-14 bg-slate-800 border-r border-slate-700 py-3 shrink-0">
@@ -126,15 +131,29 @@ export default function Toolbar() {
         onChange={handleUpload}
       />
 
+      {/* Scale calibration */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={onStartCalibration}
+            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+              isCalibrating
+                ? "bg-amber-500 text-white shadow-lg shadow-amber-500/30"
+                : "text-slate-400 hover:text-white hover:bg-slate-700"
+            }`}
+          >
+            <Ruler size={18} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="right" className="text-xs">Calibrate Scale (C)</TooltipContent>
+      </Tooltip>
+
       <div className="flex-1" />
 
       {/* Zoom controls */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            onClick={zoomIn}
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
-          >
+          <button onClick={zoomIn} className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all">
             <ZoomIn size={18} />
           </button>
         </TooltipTrigger>
@@ -143,10 +162,7 @@ export default function Toolbar() {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            onClick={zoomOut}
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
-          >
+          <button onClick={zoomOut} className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all">
             <ZoomOut size={18} />
           </button>
         </TooltipTrigger>
@@ -155,10 +171,7 @@ export default function Toolbar() {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            onClick={resetView}
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all"
-          >
+          <button onClick={resetView} className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all">
             <RotateCcw size={18} />
           </button>
         </TooltipTrigger>
@@ -170,10 +183,7 @@ export default function Toolbar() {
       {/* Clear */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            onClick={handleClearWalls}
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-all"
-          >
+          <button onClick={handleClearWalls} className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-all">
             <Trash2 size={18} />
           </button>
         </TooltipTrigger>

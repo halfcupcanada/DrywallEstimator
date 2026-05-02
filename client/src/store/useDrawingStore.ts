@@ -4,6 +4,7 @@
  */
 import { create } from "zustand";
 import { nanoid } from "nanoid";
+import type { SheetSize } from "@/lib/estimate";
 
 export type ToolType = "select" | "wall" | "pan";
 
@@ -59,6 +60,18 @@ interface DrawingState {
   // Default wall height (feet)
   defaultWallHeight: number;
   setDefaultWallHeight: (h: number) => void;
+
+  // Estimation config
+  sheetSize: SheetSize;
+  setSheetSize: (s: SheetSize) => void;
+  wasteFactor: number;
+  setWasteFactor: (f: number) => void;
+  includeCeiling: boolean;
+  setIncludeCeiling: (v: boolean) => void;
+
+  // Scale: pixels per foot (default 20px = 1ft)
+  pxPerFoot: number;
+  setPxPerFoot: (v: number) => void;
 }
 
 export const useDrawingStore = create<DrawingState>((set) => ({
@@ -90,6 +103,16 @@ export const useDrawingStore = create<DrawingState>((set) => ({
   viewport: { x: 0, y: 0, scale: 1 },
   setViewport: (v) => set({ viewport: v }),
 
-  defaultWallHeight: 9,
+   defaultWallHeight: 9,
   setDefaultWallHeight: (h) => set({ defaultWallHeight: h }),
+
+  sheetSize: "4x8",
+  setSheetSize: (s) => set({ sheetSize: s }),
+  wasteFactor: 0.10,
+  setWasteFactor: (f) => set({ wasteFactor: f }),
+  includeCeiling: false,
+  setIncludeCeiling: (v) => set({ includeCeiling: v }),
+
+  pxPerFoot: 20,
+  setPxPerFoot: (v) => set({ pxPerFoot: v }),
 }));

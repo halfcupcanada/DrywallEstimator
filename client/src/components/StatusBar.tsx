@@ -6,7 +6,7 @@
 import { useDrawingStore } from "@/store/useDrawingStore";
 
 export default function StatusBar() {
-  const { activeTool, walls, viewport, drawingStart, selectedWallId } =
+  const { activeTool, walls, viewport, drawingStart, selectedWallId, pxPerFoot } =
     useDrawingStore();
 
   const toolLabels: Record<string, string> = {
@@ -37,6 +37,8 @@ export default function StatusBar() {
       <span className="whitespace-nowrap hidden sm:inline">{walls.length} wall{walls.length !== 1 ? "s" : ""}</span>
       <span className="text-slate-600 hidden sm:inline">|</span>
       <span className="whitespace-nowrap hidden sm:inline">{Math.round(viewport.scale * 100)}%</span>
+      <span className="text-slate-600 hidden sm:inline">|</span>
+      <span className="whitespace-nowrap hidden sm:inline">Scale: {pxPerFoot.toFixed(1)} px/ft</span>
       <span className="text-slate-600 hidden md:inline">|</span>
       <span className="flex-1 truncate hidden md:inline">{hint()}</span>
       <span className="text-slate-600 hidden lg:inline">|</span>
