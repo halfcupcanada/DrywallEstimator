@@ -1,7 +1,7 @@
 /**
  * Design: Clean Construction App
- * Compact wall list panel — used in the mobile bottom drawer.
- * On desktop the right column shows EstimatePanel + this as a tab.
+ * Wall list panel — large, easy-to-tap delete buttons on every row.
+ * Selected wall shows a full-width red Delete button at the top.
  */
 import { useDrawingStore } from "@/store/useDrawingStore";
 import { wallLength } from "@/lib/snap";
@@ -30,6 +30,11 @@ export default function WallListPanel() {
 
   const selectedWall = walls.find((w) => w.id === selectedWallId);
 
+  const handleDelete = (id: string) => {
+    deleteWall(id);
+    if (selectedWallId === id) setSelectedWallId(null);
+  };
+
   return (
     <div className="w-full h-full bg-white flex flex-col overflow-hidden">
       {/* Default height */}
@@ -48,33 +53,36 @@ export default function WallListPanel() {
         />
       </div>
 
-      {/* Selected wall detail */}
+      {/* Selected wall — big delete button */}
       {selectedWall && (
-        <div className="px-4 py-3 border-b border-orange-100 bg-orange-50 shrink-0">
-          <div className="flex items-center justify-between mb-2">
+        <div className="px-3 py-3 border-b border-orange-100 bg-orange-50 shrink-0 space-y-2">
+          <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-orange-700">Selected Wall</span>
-            <button
-              onClick={() => { deleteWall(selectedWall.id); setSelectedWallId(null); }}
-              className="text-red-400 hover:text-red-600"
-            >
-              <Trash2 size={13} />
-            </button>
+            <span className="text-xs text-slate-500 font-mono">
+              {formatLength(wallLength(selectedWall))} × {selectedWall.height}'
+            </span>
           </div>
-          <div className="text-xs text-slate-600 space-y-1">
-            <div className="flex justify-between">
-              <span>Length</span>
-              <span className="font-mono font-medium">{formatLength(wallLength(selectedWall))}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Height (ft)</span>
-              <input
-                type="number" min={6} max={20} step={0.5}
-                value={selectedWall.height}
-                onChange={(e) => updateWall(selectedWall.id, { height: parseFloat(e.target.value) || defaultWallHeight })}
-                className="w-16 text-right text-xs border border-orange-200 rounded px-1 py-0.5 bg-white focus:outline-none focus:ring-1 focus:ring-orange-400"
-              />
-            </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-500 shrink-0">Height (ft)</label>
+            <input
+              type="number" min={6} max={20} step={0.5}
+              value={selectedWall.height}
+              onChange={(e) =>
+                updateWall(selectedWall.id, {
+                  height: parseFloat(e.target.value) || defaultWallHeight,
+                })
+              }
+              className="flex-1 text-xs border border-orange-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-orange-400"
+            />
           </div>
+          {/* Big red delete button */}
+          <button
+            onClick={() => handleDelete(selectedWall.id)}
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
+          >
+            <Trash2 size={15} />
+            Delete This Wall
+          </button>
         </div>
       )}
 
@@ -93,20 +101,33 @@ export default function WallListPanel() {
                 <li
                   key={wall.id}
                   onClick={() => setSelectedWallId(isSelected ? null : wall.id)}
-                  className={`px-4 py-2 cursor-pointer flex items-center gap-2 transition-colors ${
-                    isSelected ? "bg-orange-50 border-l-2 border-orange-500" : "hover:bg-slate-50 border-l-2 border-transparent"
+                  className={`px-3 py-2.5 cursor-pointer flex items-center gap-2 transition-colors ${
+                    isSelected
+                      ? "bg-orange-50 border-l-2 border-orange-500"
+                      : "hover:bg-slate-50 border-l-2 border-transparent"
                   }`}
                 >
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${isSelected ? "bg-orange-500" : "bg-blue-500"}`} />
+                  <div
+                    className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                      isSelected ? "bg-orange-500" : "bg-blue-500"
+                    }`}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium text-slate-700">Wall {i + 1}</div>
-                    <div className="text-xs text-slate-400 font-mono">{formatLength(wallLength(wall))} × {wall.height}'</div>
+                    <div className="text-xs text-slate-400 font-mono">
+                      {formatLength(wallLength(wall))} × {wall.height}'
+                    </div>
                   </div>
+                  {/* Large enough to tap easily */}
                   <button
-                    onClick={(e) => { e.stopPropagation(); deleteWall(wall.id); if (isSelected) setSelectedWallId(null); }}
-                    className="text-slate-300 hover:text-red-400 shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(wall.id);
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-red-500 active:bg-red-600 transition-colors shrink-0"
+                    title="Delete wall"
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={15} />
                   </button>
                 </li>
               );

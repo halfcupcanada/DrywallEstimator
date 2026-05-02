@@ -404,7 +404,7 @@ export default function DrawingCanvas({ width, height }: Props) {
             thickness={wallThickness}
             scale={viewport.scale}
             pxPerFoot={pxPerFoot}
-            onClick={() => { if (activeTool === "select") setSelectedWallId(wall.id === selectedWallId ? null : wall.id); }}
+            onClick={() => setSelectedWallId(wall.id === selectedWallId ? null : wall.id)}
           />
         ))}
 

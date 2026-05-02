@@ -1,13 +1,15 @@
 /**
  * Design: Clean Construction App
  * Measures available space and passes exact pixel dimensions to DrawingCanvas.
- * Also handles scale calibration point picking by intercepting canvas clicks.
+ * Also handles scale calibration point picking and shows a floating delete button
+ * above the midpoint of the selected wall.
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import DrawingCanvas from "./DrawingCanvas";
 import { useDrawingStore } from "@/store/useDrawingStore";
 import type { CalibrationState } from "./ScaleCalibrator";
 import type { Point } from "@/store/useDrawingStore";
+import { Trash2 } from "lucide-react";
 
 interface Props {
   calibrationState: CalibrationState;
@@ -27,7 +29,13 @@ export default function CanvasContainer({
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 800, height: 600 });
-  const { viewport } = useDrawingStore();
+  const {
+    viewport,
+    selectedWallId,
+    walls,
+    deleteWall,
+    setSelectedWallId,
+  } = useDrawingStore();
 
   useEffect(() => {
     const measure = () => {
@@ -49,12 +57,10 @@ export default function CanvasContainer({
       const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
       const stageX = e.clientX - rect.left;
       const stageY = e.clientY - rect.top;
-      // Convert to canvas coordinates
       const canvasPoint: Point = {
         x: (stageX - viewport.x) / viewport.scale,
         y: (stageY - viewport.y) / viewport.scale,
       };
-
       if (calibrationState === "picking-first") {
         setCalFirstPoint({ canvas: canvasPoint });
         setCalibrationState("picking-second");
@@ -68,12 +74,50 @@ export default function CanvasContainer({
 
   const isCalibrating = calibrationState === "picking-first" || calibrationState === "picking-second";
 
+  // Compute screen-space midpoint of the selected wall for the floating delete button
+  const selectedWall = walls.find((w) => w.id === selectedWallId);
+  const deleteButtonPos = selectedWall
+    ? {
+        x: ((selectedWall.start.x + selectedWall.end.x) / 2) * viewport.scale + viewport.x,
+        y: ((selectedWall.start.y + selectedWall.end.y) / 2) * viewport.scale + viewport.y,
+      }
+    : null;
+
+  const handleDelete = () => {
+    if (!selectedWallId) return;
+    deleteWall(selectedWallId);
+    setSelectedWallId(null);
+  };
+
   return (
     <div
       ref={containerRef}
       style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
     >
       <DrawingCanvas width={size.width} height={size.height} />
+
+      {/* Floating delete button for selected wall */}
+      {deleteButtonPos && selectedWall && !isCalibrating && (
+        <div
+          style={{
+            position: "absolute",
+            left: deleteButtonPos.x,
+            top: Math.max(deleteButtonPos.y - 40, 8),
+            transform: "translateX(-50%)",
+            zIndex: 20,
+            pointerEvents: "auto",
+          }}
+        >
+          <button
+            onClick={handleDelete}
+            className="flex items-center gap-1.5 px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-full shadow-lg shadow-red-500/40 transition-all active:scale-95 select-none"
+            style={{ whiteSpace: "nowrap" }}
+          >
+            <Trash2 size={13} />
+            Delete Wall
+          </button>
+        </div>
+      )}
 
       {/* Calibration click overlay */}
       {isCalibrating && (
