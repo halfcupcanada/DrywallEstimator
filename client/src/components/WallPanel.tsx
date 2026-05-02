@@ -1,6 +1,7 @@
 /**
  * Design: Clean Construction App
- * Right panel — wall list, selected wall details, default height setting
+ * Right panel — wall list, selected wall details, default height setting.
+ * Uses h-full so it fills whatever container it's placed in (desktop sidebar or mobile drawer).
  */
 import { useDrawingStore } from "@/store/useDrawingStore";
 import { wallLength } from "@/lib/snap";
@@ -36,9 +37,9 @@ export default function WallPanel() {
   }, 0);
 
   return (
-    <aside className="w-64 bg-white border-l border-slate-200 flex flex-col shrink-0 overflow-hidden">
+    <aside className="w-full h-full bg-white border-l border-slate-200 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
+      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 shrink-0">
         <div className="flex items-center gap-2">
           <Layers size={15} className="text-blue-600" />
           <span className="text-sm font-semibold text-slate-700">Walls</span>
@@ -49,7 +50,7 @@ export default function WallPanel() {
       </div>
 
       {/* Default height */}
-      <div className="px-4 py-3 border-b border-slate-100">
+      <div className="px-4 py-3 border-b border-slate-100 shrink-0">
         <label className="text-xs text-slate-500 font-medium block mb-1">
           Default Wall Height (ft)
         </label>
@@ -66,7 +67,7 @@ export default function WallPanel() {
 
       {/* Selected wall detail */}
       {selectedWall && (
-        <div className="px-4 py-3 border-b border-orange-100 bg-orange-50">
+        <div className="px-4 py-3 border-b border-orange-100 bg-orange-50 shrink-0">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-orange-700">Selected Wall</span>
             <button
@@ -113,7 +114,7 @@ export default function WallPanel() {
       )}
 
       {/* Wall list */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {walls.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-slate-400 text-xs text-center px-4">
             <Layers size={24} className="mb-2 opacity-40" />
@@ -153,7 +154,7 @@ export default function WallPanel() {
                       deleteWall(wall.id);
                       if (isSelected) setSelectedWallId(null);
                     }}
-                    className="text-slate-300 hover:text-red-400 transition-colors"
+                    className="text-slate-300 hover:text-red-400 transition-colors shrink-0"
                   >
                     <Trash2 size={12} />
                   </button>
@@ -166,7 +167,7 @@ export default function WallPanel() {
 
       {/* Summary */}
       {walls.length > 0 && (
-        <div className="px-4 py-3 border-t border-slate-200 bg-slate-50">
+        <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 shrink-0">
           <div className="text-xs text-slate-500 space-y-1">
             <div className="flex justify-between">
               <span>Total Wall Area</span>
