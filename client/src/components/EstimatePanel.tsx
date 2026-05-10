@@ -3,7 +3,11 @@
  * Right panel — real-time drywall estimate with sheet config controls.
  * Shows per-room breakdown when closed rooms are detected, plus grand total.
  */
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import {
+  ONBOARDING_ESTIMATE_KEY,
+  ONBOARDING_PDF_KEY,
+} from "@/components/OnboardingModal";
 import { useDrawingStore } from "@/store/useDrawingStore";
 import { calculateEstimate, type SheetSize } from "@/lib/estimate";
 import { wallLength } from "@/lib/snap";
@@ -25,6 +29,11 @@ import {
 } from "lucide-react";
 
 export default function EstimatePanel() {
+  // Mark 'read estimate' step complete when panel mounts
+  useEffect(() => {
+    localStorage.setItem(ONBOARDING_ESTIMATE_KEY, "1");
+  }, []);
+
   const {
     walls,
     pxPerFoot,
@@ -314,6 +323,7 @@ export default function EstimatePanel() {
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
+                  localStorage.setItem(ONBOARDING_PDF_KEY, "1");
                   generateEstimatePDF({
                     projectName: exportProjectName || "Untitled Project",
                     sheetSize,
@@ -336,6 +346,7 @@ export default function EstimatePanel() {
               </button>
               <button
                 onClick={() => {
+                  localStorage.setItem(ONBOARDING_PDF_KEY, "1");
                   generateEstimatePDF({
                     projectName: exportProjectName || "Untitled Project",
                     sheetSize,

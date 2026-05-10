@@ -29,3 +29,8 @@
 - [x] Email invite delivery via Resend (send actual invite email from team.invite procedure)
 - [x] Show active project name in app header
 - [x] Stripe sandbox claim guidance for halfcupcanada@gmail.com
+
+## Next Steps (Round 5)
+- [x] Trial expiry enforcement via Stripe webhook (subscription.deleted / customer.subscription.updated)
+- [x] First-run onboarding checklist modal (draw wall → close room → estimate → PDF)
+- [x] Resend domain verification guide in admin settings panel

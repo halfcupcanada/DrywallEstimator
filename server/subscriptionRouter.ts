@@ -165,6 +165,37 @@ export async function handleStripeWebhook(req: Request, res: Response) {
         break;
       }
 
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subId = (invoice as any).subscription as string | null;
+        if (subId) {
+          await db
+            .update(subscriptions)
+            .set({ status: "past_due" })
+            .where(eq(subscriptions.stripeSubscriptionId, subId));
+          console.log(`[Webhook] invoice.payment_failed → set past_due for sub ${subId}`);
+        }
+        break;
+      }
+
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subId = (invoice as any).subscription as string | null;
+        if (subId) {
+          // Retrieve fresh subscription to get accurate status + period
+          const stripeSub = await stripe.subscriptions.retrieve(subId);
+          await db
+            .update(subscriptions)
+            .set({
+              status: stripeSub.status as "active" | "trialing" | "past_due" | "canceled" | "incomplete",
+              currentPeriodEnd: new Date((stripeSub as any).current_period_end * 1000),
+            })
+            .where(eq(subscriptions.stripeSubscriptionId, subId));
+          console.log(`[Webhook] invoice.paid → ${stripeSub.status} for sub ${subId}`);
+        }
+        break;
+      }
+
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const stripeSub = event.data.object as Stripe.Subscription;

@@ -26,6 +26,7 @@ import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import ProjectsPanel from "@/components/ProjectsPanel";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import OnboardingModal from "@/components/OnboardingModal";
 
 type MobileTab = "estimate" | "walls";
 
@@ -268,6 +269,8 @@ export default function Home() {
       {projectsPanelOpen && (
         <ProjectsPanel onClose={() => setProjectsPanelOpen(false)} />
       )}
+      {/* ── Onboarding checklist ────────────────────────────────────── */}
+      <OnboardingModal />
     </div>
   );
 }

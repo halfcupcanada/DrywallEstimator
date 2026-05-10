@@ -34,8 +34,9 @@ function LoadingScreen() {
   );
 }
 
-function SubscribePrompt() {
+function SubscribePrompt({ status }: { status?: string | null }) {
   const createCheckout = trpc.subscription.createCheckout.useMutation();
+  const createPortal = trpc.subscription.createPortal.useMutation();
 
   const handleSubscribe = async () => {
     try {
@@ -49,31 +50,74 @@ function SubscribePrompt() {
     }
   };
 
+  const handleManageBilling = async () => {
+    try {
+      const result = await createPortal.mutateAsync({ origin: window.location.origin });
+      if (result.url) window.open(result.url, "_blank");
+    } catch {
+      // ignore
+    }
+  };
+
+  const isPastDue = status === "past_due";
+  const isCanceled = status === "canceled";
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white rounded-2xl border border-gray-200 shadow-lg p-8 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center mx-auto mb-5">
-          <Lock className="text-orange-500" size={26} />
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 ${
+          isPastDue ? "bg-red-50" : "bg-orange-50"
+        }`}>
+          <Lock className={isPastDue ? "text-red-500" : "text-orange-500"} size={26} />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Subscription required</h2>
-        <p className="text-gray-500 mb-6 leading-relaxed">
-          Start a 14-day free trial to access DrywallPro. No credit card required.
-        </p>
-        <Button
-          onClick={handleSubscribe}
-          disabled={createCheckout.isPending}
-          className="bg-orange-600 hover:bg-orange-700 text-white w-full h-11"
-        >
-          {createCheckout.isPending ? (
-            <Loader2 className="animate-spin mr-2" size={16} />
-          ) : (
-            <ArrowRight size={16} className="mr-2" />
-          )}
-          Start Free Trial
-        </Button>
+        {isPastDue ? (
+          <>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment failed</h2>
+            <p className="text-gray-500 mb-6 leading-relaxed">
+              Your last payment didn’t go through. Update your billing details to restore access.
+            </p>
+            <Button
+              onClick={handleManageBilling}
+              disabled={createPortal.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white w-full h-11"
+            >
+              {createPortal.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <ArrowRight size={16} className="mr-2" />}
+              Update Payment Method
+            </Button>
+          </>
+        ) : isCanceled ? (
+          <>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Subscription ended</h2>
+            <p className="text-gray-500 mb-6 leading-relaxed">
+              Your subscription has been cancelled. Resubscribe to regain access.
+            </p>
+            <Button
+              onClick={handleSubscribe}
+              disabled={createCheckout.isPending}
+              className="bg-orange-600 hover:bg-orange-700 text-white w-full h-11"
+            >
+              {createCheckout.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <ArrowRight size={16} className="mr-2" />}
+              Resubscribe
+            </Button>
+          </>
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Subscription required</h2>
+            <p className="text-gray-500 mb-6 leading-relaxed">
+              Start a 14-day free trial to access DrywallPro. No credit card required.
+            </p>
+            <Button
+              onClick={handleSubscribe}
+              disabled={createCheckout.isPending}
+              className="bg-orange-600 hover:bg-orange-700 text-white w-full h-11"
+            >
+              {createCheckout.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <ArrowRight size={16} className="mr-2" />}
+              Start Free Trial
+            </Button>
+          </>
+        )}
         <p className="text-xs text-gray-400 mt-4">
-          Already subscribed?{" "}
-          <a href="/" className="text-orange-600 hover:underline">Go back</a>
+          <a href="/" className="text-orange-600 hover:underline">Back to home</a>
         </p>
       </div>
     </div>
@@ -113,7 +157,7 @@ export default function AppShell() {
   const isCompanyMember = teamData !== null && teamData !== undefined;
   const hasActiveSubscription = isOwner || hasPersonalSub || isCompanyMember;
 
-  if (!hasActiveSubscription) return <SubscribePrompt />;
+  if (!hasActiveSubscription) return <SubscribePrompt status={subscription?.status} />;
 
   return <Home />;
 }

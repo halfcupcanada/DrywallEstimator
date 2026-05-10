@@ -7,7 +7,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Users, DollarSign, TrendingUp, ArrowLeft, Building2 } from "lucide-react";
+import { Loader2, Users, DollarSign, TrendingUp, ArrowLeft, Building2, Mail, AlertTriangle, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 
 function StatusBadge({ status }: { status: string }) {
@@ -180,6 +180,91 @@ export default function AdminDashboard() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* Email Settings / Resend Domain Guide */}
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mt-6">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <Mail className="text-blue-500" size={16} />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Email Delivery Setup</h3>
+              <p className="text-xs text-gray-500">Verify halfcup.ca in Resend to send invite emails from your own domain</p>
+            </div>
+          </div>
+          <div className="p-6 space-y-5">
+            <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-100">
+              <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={16} />
+              <div>
+                <p className="text-sm font-semibold text-amber-800">Domain not yet verified</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Team invite emails currently send from Resend's shared domain. Add these DNS records to send from <strong>noreply@halfcup.ca</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-700 mb-3">Step 1 — Add halfcup.ca in Resend</p>
+              <ol className="text-sm text-gray-600 space-y-1.5 list-decimal list-inside">
+                <li>Go to <a href="https://resend.com/domains" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">resend.com/domains</a></li>
+                <li>Click <strong>Add Domain</strong> and enter <code className="bg-gray-100 px-1 rounded text-xs">halfcup.ca</code></li>
+                <li>Copy the 3 DNS records Resend provides (SPF, DKIM, DMARC)</li>
+              </ol>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-700 mb-3">Step 2 — Add DNS records at your registrar</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs border border-gray-200 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-gray-500 font-semibold">Type</th>
+                      <th className="px-3 py-2 text-left text-gray-500 font-semibold">Name</th>
+                      <th className="px-3 py-2 text-left text-gray-500 font-semibold">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    <tr>
+                      <td className="px-3 py-2 font-mono text-blue-600">TXT</td>
+                      <td className="px-3 py-2 font-mono">@</td>
+                      <td className="px-3 py-2 text-gray-500">v=spf1 include:amazonses.com ~all <span className="text-gray-400">(exact value from Resend)</span></td>
+                    </tr>
+                    <tr>
+                      <td className="px-3 py-2 font-mono text-blue-600">TXT</td>
+                      <td className="px-3 py-2 font-mono">resend._domainkey</td>
+                      <td className="px-3 py-2 text-gray-500">DKIM public key <span className="text-gray-400">(exact value from Resend)</span></td>
+                    </tr>
+                    <tr>
+                      <td className="px-3 py-2 font-mono text-blue-600">TXT</td>
+                      <td className="px-3 py-2 font-mono">_dmarc</td>
+                      <td className="px-3 py-2 text-gray-500">v=DMARC1; p=none; <span className="text-gray-400">(exact value from Resend)</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-700 mb-2">Step 3 — Update EMAIL_FROM secret</p>
+              <p className="text-sm text-gray-600">
+                Once verified, go to <strong>Settings → Secrets</strong> in the Manus Management UI and update:
+              </p>
+              <code className="block mt-2 bg-gray-900 text-green-400 text-xs p-3 rounded-lg font-mono">
+                EMAIL_FROM = noreply@halfcup.ca
+              </code>
+            </div>
+
+            <a
+              href="https://resend.com/domains"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+            >
+              <ExternalLink size={14} />
+              Open Resend Domains
+            </a>
           </div>
         </div>
       </div>
