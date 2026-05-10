@@ -39,6 +39,7 @@ import {
   SNAP_RADIUS,
 } from "@/lib/snap";
 import type { Point, Wall } from "@/store/useDrawingStore";
+import { detectRooms } from "@/lib/roomDetect";
 
 function formatLength(px: number, pxPerFoot: number): string {
   const feet = px / pxPerFoot;
@@ -139,6 +140,7 @@ export default function DrawingCanvas({ width, height }: Props) {
       if (e.key === "w" || e.key === "W") useDrawingStore.getState().setActiveTool("wall");
       if (e.key === "s" || e.key === "S") useDrawingStore.getState().setActiveTool("select");
       if (e.key === "p" || e.key === "P") useDrawingStore.getState().setActiveTool("pan");
+      if (e.key === "o" || e.key === "O") useDrawingStore.getState().setActiveTool("opening");
     };
     const onKeyUp = (e: KeyboardEvent) => {
       if (e.key === "Shift") setShiftHeld(false);
@@ -443,6 +445,9 @@ export default function DrawingCanvas({ width, height }: Props) {
   const previewColor = "#F97316";
   const wallThickness = 4;
 
+  // Detect closed rooms for polygon fill
+  const rooms = detectRooms(walls, pxPerFoot);
+
   // Cursor style
   let cursor = "default";
   if (activeTool === "pan") cursor = "grab";
@@ -476,6 +481,20 @@ export default function DrawingCanvas({ width, height }: Props) {
             listening={false}
           />
         )}
+
+        {/* Room polygon fills */}
+        {rooms.map((room, i) => (
+          <Line
+            key={`room-fill-${i}`}
+            points={room.vertices.flatMap((v) => [v.x, v.y])}
+            closed
+            fill="#2563EB14"
+            stroke="#2563EB40"
+            strokeWidth={1.5 / viewport.scale}
+            dash={[6 / viewport.scale, 4 / viewport.scale]}
+            listening={false}
+          />
+        ))}
 
         {/* Completed walls */}
         {walls.map((wall) => (

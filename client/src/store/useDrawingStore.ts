@@ -6,7 +6,7 @@ import { create } from "zustand";
 import { nanoid } from "nanoid";
 import type { SheetSize } from "@/lib/estimate";
 
-export type ToolType = "select" | "wall" | "pan";
+export type ToolType = "select" | "wall" | "pan" | "opening";
 
 export interface Point {
   x: number;
@@ -19,6 +19,22 @@ export interface Wall {
   end: Point;
   /** height in feet */
   height: number;
+}
+
+export type OpeningType = "door" | "window";
+
+export interface Opening {
+  id: string;
+  wallId: string;
+  /** 0–1 position along the wall */
+  t: number;
+  type: OpeningType;
+  /** width in feet */
+  widthFt: number;
+  /** height in feet */
+  heightFt: number;
+  /** bottom of opening from floor, in feet (0 for doors) */
+  sillFt: number;
 }
 
 export interface CanvasViewport {
@@ -39,6 +55,12 @@ interface DrawingState {
   deleteWall: (id: string) => void;
   clearWalls: () => void;
 
+  // Openings (doors & windows)
+  openings: Opening[];
+  addOpening: (opening: Omit<Opening, "id">) => void;
+  updateOpening: (id: string, updates: Partial<Opening>) => void;
+  deleteOpening: (id: string) => void;
+
   // In-progress wall being drawn
   drawingStart: Point | null;
   setDrawingStart: (p: Point | null) => void;
@@ -46,6 +68,10 @@ interface DrawingState {
   // Selected wall
   selectedWallId: string | null;
   setSelectedWallId: (id: string | null) => void;
+
+  // Selected opening
+  selectedOpeningId: string | null;
+  setSelectedOpeningId: (id: string | null) => void;
 
   // Floor plan image
   floorPlanUrl: string | null;
@@ -86,14 +112,30 @@ export const useDrawingStore = create<DrawingState>((set) => ({
       walls: s.walls.map((w) => (w.id === id ? { ...w, ...updates } : w)),
     })),
   deleteWall: (id) =>
-    set((s) => ({ walls: s.walls.filter((w) => w.id !== id) })),
-  clearWalls: () => set({ walls: [], selectedWallId: null }),
+    set((s) => ({
+      walls: s.walls.filter((w) => w.id !== id),
+      openings: s.openings.filter((o) => o.wallId !== id),
+    })),
+  clearWalls: () => set({ walls: [], openings: [], selectedWallId: null }),
+
+  openings: [],
+  addOpening: (opening) =>
+    set((s) => ({ openings: [...s.openings, { ...opening, id: nanoid() }] })),
+  updateOpening: (id, updates) =>
+    set((s) => ({
+      openings: s.openings.map((o) => (o.id === id ? { ...o, ...updates } : o)),
+    })),
+  deleteOpening: (id) =>
+    set((s) => ({ openings: s.openings.filter((o) => o.id !== id) })),
 
   drawingStart: null,
   setDrawingStart: (p) => set({ drawingStart: p }),
 
   selectedWallId: null,
   setSelectedWallId: (id) => set({ selectedWallId: id }),
+
+  selectedOpeningId: null,
+  setSelectedOpeningId: (id) => set({ selectedOpeningId: id }),
 
   floorPlanUrl: null,
   floorPlanSize: null,
@@ -103,7 +145,7 @@ export const useDrawingStore = create<DrawingState>((set) => ({
   viewport: { x: 0, y: 0, scale: 1 },
   setViewport: (v) => set({ viewport: v }),
 
-   defaultWallHeight: 9,
+  defaultWallHeight: 9,
   setDefaultWallHeight: (h) => set({ defaultWallHeight: h }),
 
   sheetSize: "4x8",

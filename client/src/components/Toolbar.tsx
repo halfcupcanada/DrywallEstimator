@@ -14,6 +14,7 @@ import {
   RotateCcw,
   Upload,
   Ruler,
+  DoorOpen,
 } from "lucide-react";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ const TOOLS: { id: ToolType; icon: React.ReactNode; label: string; shortcut: str
   { id: "select", icon: <MousePointer2 size={18} />, label: "Select", shortcut: "S" },
   { id: "wall", icon: <Pencil size={18} />, label: "Draw Wall", shortcut: "W" },
   { id: "pan", icon: <Hand size={18} />, label: "Pan", shortcut: "P" },
+  { id: "opening", icon: <DoorOpen size={18} />, label: "Add Opening", shortcut: "O" },
 ];
 
 interface Props {

@@ -13,6 +13,7 @@ export default function StatusBar() {
     select: "Select",
     wall: "Draw Wall",
     pan: "Pan",
+    opening: "Add Opening",
   };
 
   const hint = () => {
@@ -25,6 +26,7 @@ export default function StatusBar() {
       return "Click a wall to select it";
     }
     if (activeTool === "pan") return "Drag to pan · Scroll to zoom";
+    if (activeTool === "opening") return "Click a wall to place a door or window";
     return "";
   };
 
