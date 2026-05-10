@@ -67,6 +67,16 @@ export const subscriptionRouter = router({
         customer_email: ctx.user.email ?? undefined,
         allow_promotion_codes: true,
         client_reference_id: ctx.user.id.toString(),
+        // 14-day free trial — no payment required until trial ends
+        subscription_data: {
+          trial_period_days: 14,
+          metadata: {
+            user_id: ctx.user.id.toString(),
+            plan: plan.slug,
+          },
+        },
+        // Only collect payment method if needed (after trial ends)
+        payment_method_collection: "if_required",
         metadata: {
           user_id: ctx.user.id.toString(),
           customer_email: ctx.user.email ?? "",
