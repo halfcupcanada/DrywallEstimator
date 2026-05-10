@@ -43,17 +43,18 @@
 }
 
 :root {
-  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
+  /* HalfCup brand: deep orange primary */
+  --primary: oklch(0.60 0.19 38);
+  --primary-foreground: oklch(0.99 0 0);
+  --sidebar-primary: oklch(0.60 0.19 38);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --chart-1: oklch(0.75 0.14 38);
+  --chart-2: oklch(0.60 0.19 38);
+  --chart-3: oklch(0.50 0.18 38);
+  --chart-4: oklch(0.40 0.16 38);
+  --chart-5: oklch(0.30 0.12 38);
   --radius: 0.65rem;
   --background: oklch(0.985 0.002 240);
   --foreground: oklch(0.235 0.015 65);
