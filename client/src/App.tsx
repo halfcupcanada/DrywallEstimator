@@ -9,12 +9,17 @@ import AppShell from "./pages/AppShell";
 import AdminDashboard from "./pages/AdminDashboard";
 import TeamPage from "./pages/TeamPage";
 import JoinPage from "./pages/JoinPage";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 function Router() {
   return (
     <Switch>
       {/* Public landing page */}
       <Route path={"/"} component={Landing} />
+      {/* Email/password auth */}
+      <Route path={"/login"} component={Login} />
+      <Route path={"/signup"} component={Signup} />
       {/* Auth-gated drawing app */}
       <Route path={"/app"} component={AppShell} />
       {/* Admin-only dashboard */}

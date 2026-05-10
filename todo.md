@@ -38,3 +38,14 @@
 ## Bug Fixes
 - [x] Mobile popup blocker fix: replaced window.open with window.location.href for Stripe Checkout and Billing Portal
 - [x] Admin bypass fix: admin role now bypasses subscription gate immediately without waiting for subscription data
+
+## Email/Password Auth Migration
+- [x] Add passwordHash column to users table in drizzle/schema.ts
+- [x] Run pnpm db:push to migrate schema
+- [x] Implement /api/auth/signup, /api/auth/login, /api/auth/logout, /api/auth/me Express routes
+- [x] Use bcrypt for password hashing, JWT for session cookie
+- [x] Build /login and /signup pages with email+password forms
+- [x] Update useAuth hook to call /api/auth/me (works via existing trpc.auth.me which now checks email session first)
+- [x] Replace all getLoginUrl() references with /login route
+- [x] Manus OAuth kept as fallback (not removed, for safety)
+- [x] Seed admin account (halfcupcanada@gmail.com) with hashed password via one-time script (script deleted after use)

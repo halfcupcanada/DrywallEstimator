@@ -22,6 +22,19 @@
       "when": 1778422638801,
       "tag": "0002_lumpy_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1778429082248,
+      "tag": "0003_skinny_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "when": 1747000000000,
+      "tag": "0003_skinny_cloak",
+      "breakpoints": true
     }
   ]
 }

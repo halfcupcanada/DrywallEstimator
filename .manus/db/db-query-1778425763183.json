@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, name, email, role FROM users WHERE email = 'halfcupcanada@gmail.com' OR email = 'rahul.chona@rohitgroup.com' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4Vvz5G3HfHv1mP1.4e88ecd99e4a --database aoCmipCiH7MmaHdZQmGfxS --execute SELECT id, name, email, role FROM users WHERE email = 'halfcupcanada@gmail.com' OR email = 'rahul.chona@rohitgroup.com' LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "rahul.chona",
+      "email": "rahul.chona@rohitgroup.com",
+      "role": "admin"
+    },
+    {
+      "id": "30002",
+      "name": "rahul.chona",
+      "email": "rahul.chona@rohitgroup.com",
+      "role": "user"
+    },
+    {
+      "id": "90002",
+      "name": "Half Cup",
+      "email": "halfcupcanada@gmail.com",
+      "role": "user"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\trahul.chona\trahul.chona@rohitgroup.com\tadmin\n30002\trahul.chona\trahul.chona@rohitgroup.com\tuser\n90002\tHalf Cup\thalfcupcanada@gmail.com\tuser\n",
+  "stderr": "",
+  "execution_time_ms": 255
+}
