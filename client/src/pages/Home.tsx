@@ -39,7 +39,7 @@ export default function Home() {
   const handleManageBilling = async () => {
     try {
       const result = await createPortal.mutateAsync({ origin: window.location.origin });
-      if (result.url) window.open(result.url, "_blank");
+      if (result.url) window.location.href = result.url;
     } catch {
       // no subscription yet
     }

@@ -34,3 +34,7 @@
 - [x] Trial expiry enforcement via Stripe webhook (subscription.deleted / customer.subscription.updated)
 - [x] First-run onboarding checklist modal (draw wall → close room → estimate → PDF)
 - [x] Resend domain verification guide in admin settings panel
+
+## Bug Fixes
+- [x] Mobile popup blocker fix: replaced window.open with window.location.href for Stripe Checkout and Billing Portal
+- [x] Admin bypass fix: admin role now bypasses subscription gate immediately without waiting for subscription data

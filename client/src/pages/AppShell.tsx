@@ -44,7 +44,8 @@ function SubscribePrompt({ status }: { status?: string | null }) {
         plan: "starter",
         origin: window.location.origin,
       });
-      if (result.url) window.open(result.url, "_blank");
+      // Use location.href instead of window.open to avoid mobile popup blockers
+      if (result.url) window.location.href = result.url;
     } catch {
       // ignore
     }
@@ -53,7 +54,7 @@ function SubscribePrompt({ status }: { status?: string | null }) {
   const handleManageBilling = async () => {
     try {
       const result = await createPortal.mutateAsync({ origin: window.location.origin });
-      if (result.url) window.open(result.url, "_blank");
+      if (result.url) window.location.href = result.url;
     } catch {
       // ignore
     }
@@ -146,16 +147,21 @@ export default function AppShell() {
     }
   }, [loading, isAuthenticated]);
 
-  if (loading || subLoading || teamLoading) return <LoadingScreen />;
+  if (loading) return <LoadingScreen />;
   if (!isAuthenticated) return <LoadingScreen />;
 
-  // Allow owner (admin) to bypass subscription check
+  // Allow owner (admin) to bypass subscription check immediately — no need to wait for sub data
   const isOwner = user?.role === "admin";
+  if (isOwner) return <Home />;
+
+  // Still loading subscription/team data for non-admins
+  if (subLoading || teamLoading) return <LoadingScreen />;
+
   const hasPersonalSub =
     subscription && (subscription.status === "active" || subscription.status === "trialing");
   // Allow accepted company members (company owner handles billing)
   const isCompanyMember = teamData !== null && teamData !== undefined;
-  const hasActiveSubscription = isOwner || hasPersonalSub || isCompanyMember;
+  const hasActiveSubscription = hasPersonalSub || isCompanyMember;
 
   if (!hasActiveSubscription) return <SubscribePrompt status={subscription?.status} />;
 
