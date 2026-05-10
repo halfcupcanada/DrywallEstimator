@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO subscriptions (userId, plan, status, currentPeriodEnd, createdAt, updatedAt)\nSELECT u.id, 'starter', 'trialing', DATE_ADD(NOW(), INTERVAL 14 DAY), NOW(), NOW()\nFROM users u\nLEFT JOIN subscriptions s ON s.userId = u.id\nWHERE s.id IS NULL AND u.role = 'user';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4Vvz5G3HfHv1mP1.4e88ecd99e4a --database aoCmipCiH7MmaHdZQmGfxS --execute INSERT INTO subscriptions (userId, plan, status, currentPeriodEnd, createdAt, updatedAt)\nSELECT u.id, 'starter', 'trialing', DATE_ADD(NOW(), INTERVAL 14 DAY), NOW(), NOW()\nFROM users u\nLEFT JOIN subscriptions s ON s.userId = u.id\nWHERE s.id IS NULL AND u.role = 'user';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 268
+}

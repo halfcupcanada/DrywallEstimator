@@ -49,3 +49,4 @@
 - [x] Replace all getLoginUrl() references with /login route
 - [x] Manus OAuth kept as fallback (not removed, for safety)
 - [x] Seed admin account (halfcupcanada@gmail.com) with hashed password via one-time script (script deleted after use)
+- [x] Auto-create 14-day trialing subscription on signup so new users bypass subscription gate immediately

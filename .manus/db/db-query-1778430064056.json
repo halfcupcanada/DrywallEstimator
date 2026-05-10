@@ -1,0 +1,16 @@
+{
+  "query": "SELECT u.email, s.status, s.plan, s.currentPeriodEnd FROM users u JOIN subscriptions s ON s.userId = u.id WHERE u.email = 'trialtest_delete@example.com'; DELETE FROM subscriptions WHERE userId IN (SELECT id FROM users WHERE email = 'trialtest_delete@example.com'); DELETE FROM users WHERE email = 'trialtest_delete@example.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4Vvz5G3HfHv1mP1.4e88ecd99e4a --database aoCmipCiH7MmaHdZQmGfxS --execute SELECT u.email, s.status, s.plan, s.currentPeriodEnd FROM users u JOIN subscriptions s ON s.userId = u.id WHERE u.email = 'trialtest_delete@example.com'; DELETE FROM subscriptions WHERE userId IN (SELECT id FROM users WHERE email = 'trialtest_delete@example.com'); DELETE FROM users WHERE email = 'trialtest_delete@example.com';",
+  "rows": [
+    {
+      "email": "trialtest_delete@example.com",
+      "status": "trialing",
+      "plan": "starter",
+      "currentPeriodEnd": "2026-05-24 16:20:57"
+    }
+  ],
+  "messages": [],
+  "stdout": "email\tstatus\tplan\tcurrentPeriodEnd\ntrialtest_delete@example.com\ttrialing\tstarter\t2026-05-24 16:20:57\n",
+  "stderr": "",
+  "execution_time_ms": 377
+}

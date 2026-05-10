@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import type { Express, Request, Response } from "express";
 import { SignJWT, jwtVerify } from "jose";
 import { nanoid } from "nanoid";
-import { users } from "../drizzle/schema";
+import { users, subscriptions } from "../drizzle/schema";
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { getDb } from "./db";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -77,6 +77,15 @@ export function registerEmailAuthRoutes(app: Express) {
 
     const newUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (!newUser[0]) { res.status(500).json({ error: "Failed to create user" }); return; }
+
+    // Auto-create a 14-day trialing subscription so new users can access the app immediately
+    const trialEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    await db.insert(subscriptions).values({
+      userId: newUser[0].id,
+      plan: "starter",
+      status: "trialing",
+      currentPeriodEnd: trialEnd,
+    });
 
     const token = await createSessionToken(newUser[0].id, email);
     const cookieOptions = getSessionCookieOptions(req);
