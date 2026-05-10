@@ -10,6 +10,7 @@ import { useDrawingStore } from "@/store/useDrawingStore";
 import type { CalibrationState } from "./ScaleCalibrator";
 import type { Point } from "@/store/useDrawingStore";
 import { Trash2 } from "lucide-react";
+import RoomSummaryOverlay from "./RoomSummaryOverlay";
 
 interface Props {
   calibrationState: CalibrationState;
@@ -118,6 +119,9 @@ export default function CanvasContainer({
           </button>
         </div>
       )}
+
+      {/* Room summary overlay */}
+      <RoomSummaryOverlay />
 
       {/* Calibration click overlay */}
       {isCalibrating && (
