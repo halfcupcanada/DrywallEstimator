@@ -25,6 +25,7 @@ import { Layers, Package, ChevronDown, ChevronUp, LogOut, Settings, FolderOpen, 
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import ProjectsPanel from "@/components/ProjectsPanel";
+import { useAutoSave } from "@/hooks/useAutoSave";
 
 type MobileTab = "estimate" | "walls";
 
@@ -43,10 +44,13 @@ export default function Home() {
     }
   };
 
-  const { setActiveTool, walls } = useDrawingStore();
+  const { setActiveTool, walls, currentProjectName } = useDrawingStore();
   const [panelOpen, setPanelOpen] = useState(false);
   const [projectsPanelOpen, setProjectsPanelOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<MobileTab>("estimate");
+
+  // Auto-save the active project whenever walls/openings change (2s debounce)
+  useAutoSave();
 
   // Scale calibration state
   const [calibrationState, setCalibrationState] =

@@ -89,6 +89,12 @@ export default function AppShell() {
     { enabled: isAuthenticated }
   );
 
+  // Check if user is a member of a company with an active Enterprise subscription
+  const { data: teamData, isLoading: teamLoading } = trpc.team.myCompany.useQuery(
+    undefined,
+    { enabled: isAuthenticated, retry: false }
+  );
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -96,14 +102,16 @@ export default function AppShell() {
     }
   }, [loading, isAuthenticated]);
 
-  if (loading || subLoading) return <LoadingScreen />;
+  if (loading || subLoading || teamLoading) return <LoadingScreen />;
   if (!isAuthenticated) return <LoadingScreen />;
 
   // Allow owner (admin) to bypass subscription check
   const isOwner = user?.role === "admin";
-  const hasActiveSubscription =
-    isOwner ||
-    (subscription && (subscription.status === "active" || subscription.status === "trialing"));
+  const hasPersonalSub =
+    subscription && (subscription.status === "active" || subscription.status === "trialing");
+  // Allow accepted company members (company owner handles billing)
+  const isCompanyMember = teamData !== null && teamData !== undefined;
+  const hasActiveSubscription = isOwner || hasPersonalSub || isCompanyMember;
 
   if (!hasActiveSubscription) return <SubscribePrompt />;
 

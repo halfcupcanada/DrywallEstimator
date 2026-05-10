@@ -23,11 +23,13 @@ interface Props {
 }
 
 export default function ProjectsPanel({ onClose }: Props) {
-  const { walls, openings, pxPerFoot, setWalls, setOpenings, setPxPerFoot } = useDrawingStore();
+  const {
+    walls, openings, pxPerFoot,
+    setWalls, setOpenings, setPxPerFoot,
+    currentProjectId, currentProjectName, setCurrentProject,
+  } = useDrawingStore();
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
-  const [currentProjectId, setCurrentProjectId] = useState<number | null>(null);
-  const [currentProjectName, setCurrentProjectName] = useState<string>("");
 
   const utils = trpc.useUtils();
 
@@ -37,7 +39,7 @@ export default function ProjectsPanel({ onClose }: Props) {
 
   const saveMutation = trpc.project.save.useMutation({
     onSuccess: (data) => {
-      setCurrentProjectId(data.id);
+      setCurrentProject(data.id, projectName.trim() || currentProjectName);
       utils.project.list.invalidate();
       toast.success("Project saved");
       setSaveDialogOpen(false);
@@ -63,8 +65,7 @@ export default function ProjectsPanel({ onClose }: Props) {
       setWalls(loadedWalls);
       setOpenings(loadedOpenings);
       setPxPerFoot(res.pxPerFoot);
-      setCurrentProjectId(id);
-      setCurrentProjectName(name);
+      setCurrentProject(id, name);
       toast.success(`Loaded "${name}"`);
       onClose();
     } catch {
@@ -86,7 +87,7 @@ export default function ProjectsPanel({ onClose }: Props) {
   const handleQuickSave = () => {
     if (!currentProjectId || !currentProjectName) {
       setSaveDialogOpen(true);
-      setProjectName(currentProjectName || "");
+      setProjectName("");
       return;
     }
     saveMutation.mutate({
@@ -187,8 +188,7 @@ export default function ProjectsPanel({ onClose }: Props) {
                       if (confirm(`Delete "${p.name}"?`)) {
                         deleteMutation.mutate({ id: p.id });
                         if (p.id === currentProjectId) {
-                          setCurrentProjectId(null);
-                          setCurrentProjectName("");
+                          setCurrentProject(null, "");
                         }
                       }
                     }}

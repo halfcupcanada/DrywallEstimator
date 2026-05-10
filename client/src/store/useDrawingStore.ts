@@ -100,6 +100,11 @@ interface DrawingState {
   // Scale: pixels per foot (default 20px = 1ft)
   pxPerFoot: number;
   setPxPerFoot: (v: number) => void;
+
+  // Active project context (for auto-save)
+  currentProjectId: number | null;
+  currentProjectName: string;
+  setCurrentProject: (id: number | null, name: string) => void;
 }
 
 export const useDrawingStore = create<DrawingState>((set) => ({
@@ -161,4 +166,8 @@ export const useDrawingStore = create<DrawingState>((set) => ({
 
   pxPerFoot: 20,
   setPxPerFoot: (v) => set({ pxPerFoot: v }),
+
+  currentProjectId: null,
+  currentProjectName: "",
+  setCurrentProject: (id, name) => set({ currentProjectId: id, currentProjectName: name }),
 }));

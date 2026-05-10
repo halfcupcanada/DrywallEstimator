@@ -12,7 +12,7 @@
 - [x] Add projectRouter tRPC procedures: list, get, save (upsert), delete
 - [x] Add ProjectsPanel component (sidebar drawer listing saved projects)
 - [x] Add Projects button to app header
-- [ ] Auto-save on wall changes (debounced 2s) — future enhancement
+- [x] Auto-save on wall changes (debounced 2s)
 
 ## Seat-Based Team Plans
 - [x] Add `companies` table (id, name, ownerId, seats)
@@ -23,4 +23,4 @@
 - [x] Add /join page (accept invite via token)
 - [x] Add "Team" link in app header
 - [x] Send owner notification on new member join
-- [ ] Gate /app access by company membership — future enhancement
+- [x] Gate /app access by company membership (Enterprise team members can access without personal sub)
