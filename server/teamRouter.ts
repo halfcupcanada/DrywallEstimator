@@ -10,6 +10,7 @@ import { protectedProcedure, router } from "./_core/trpc";
 import { getDb } from "./db";
 import { companies, companyMembers, users } from "../drizzle/schema";
 import { notifyOwner } from "./_core/notification";
+import { sendTeamInviteEmail } from "./email";
 
 export const teamRouter = router({
   /** Get the company the current user owns or belongs to */
@@ -143,12 +144,20 @@ export const teamRouter = router({
 
       const inviteUrl = `${input.origin}/join?token=${token}`;
 
-      await notifyOwner({
-        title: "Team Invite Sent",
-        content: `${ctx.user.name ?? ctx.user.email} invited ${input.email} to "${company[0].name}". Link: ${inviteUrl}`,
+      // Send the actual invite email
+      const emailSent = await sendTeamInviteEmail({
+        toEmail: input.email,
+        inviterName: ctx.user.name ?? ctx.user.email ?? "A teammate",
+        companyName: company[0].name,
+        inviteUrl,
       });
 
-      return { inviteUrl };
+      await notifyOwner({
+        title: "Team Invite Sent",
+        content: `${ctx.user.name ?? ctx.user.email} invited ${input.email} to "${company[0].name}". Email sent: ${emailSent}. Link: ${inviteUrl}`,
+      });
+
+      return { inviteUrl, emailSent };
     }),
 
   /** Accept an invite via token */

@@ -45,11 +45,15 @@ export default function TeamPage() {
     onSuccess: (data) => {
       utils.team.myCompany.invalidate();
       setInviteEmail("");
-      toast.success("Invite sent!");
-      // Copy invite link to clipboard
+      if (data.emailSent) {
+        toast.success(`Invite email sent to ${inviteEmail}`);
+      } else {
+        toast.warning("Invite created but email delivery failed — copy the link below to share manually.");
+      }
+      // Always copy invite link to clipboard as fallback
       navigator.clipboard.writeText(data.inviteUrl).catch(() => {});
       setCopiedToken(data.inviteUrl);
-      setTimeout(() => setCopiedToken(null), 3000);
+      setTimeout(() => setCopiedToken(null), 5000);
     },
     onError: (err) => toast.error(err.message),
   });

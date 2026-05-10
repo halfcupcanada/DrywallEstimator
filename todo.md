@@ -24,3 +24,8 @@
 - [x] Add "Team" link in app header
 - [x] Send owner notification on new member join
 - [x] Gate /app access by company membership (Enterprise team members can access without personal sub)
+
+## Next Steps (Round 4)
+- [x] Email invite delivery via Resend (send actual invite email from team.invite procedure)
+- [x] Show active project name in app header
+- [x] Stripe sandbox claim guidance for halfcupcanada@gmail.com

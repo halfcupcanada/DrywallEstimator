@@ -113,6 +113,15 @@ export default function Home() {
         <span className="text-slate-500 text-[10px] hidden sm:inline whitespace-nowrap font-medium tracking-widest uppercase">
           by HalfCup
         </span>
+        {/* Active project name */}
+        {currentProjectName && (
+          <>
+            <span className="text-slate-600 text-xs hidden md:inline">·</span>
+            <span className="text-slate-300 text-xs hidden md:inline truncate max-w-[160px]" title={currentProjectName}>
+              {currentProjectName}
+            </span>
+          </>
+        )}
         <div className="flex-1" />
         {/* User menu */}
         {isAuthenticated && (
