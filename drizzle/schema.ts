@@ -48,3 +48,56 @@ export const subscriptions = mysqlTable("subscriptions", {
 
 export type Subscription = typeof subscriptions.$inferSelect;
 export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+/**
+ * Projects table — saved drawing sessions per user.
+ */
+export const projects = mysqlTable("projects", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull().default("Untitled Project"),
+  /** JSON blob: Wall[] */
+  wallsJson: text("wallsJson").notNull().default("[]"),
+  /** JSON blob: Opening[] */
+  openingsJson: text("openingsJson").notNull().default("[]"),
+  /** Pixels per foot calibration */
+  pxPerFoot: int("pxPerFoot").notNull().default(20),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
+
+/**
+ * Companies table — for Enterprise team plans.
+ */
+export const companies = mysqlTable("companies", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  ownerId: int("ownerId").notNull(),
+  seats: int("seats").notNull().default(5),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Company = typeof companies.$inferSelect;
+export type InsertCompany = typeof companies.$inferInsert;
+
+/**
+ * Company members — invite-based team membership.
+ */
+export const companyMembers = mysqlTable("companyMembers", {
+  id: int("id").autoincrement().primaryKey(),
+  companyId: int("companyId").notNull(),
+  userId: int("userId"),
+  inviteEmail: varchar("inviteEmail", { length: 320 }),
+  inviteToken: varchar("inviteToken", { length: 128 }),
+  role: mysqlEnum("role", ["owner", "member"]).notNull().default("member"),
+  status: mysqlEnum("status", ["pending", "accepted"]).notNull().default("pending"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CompanyMember = typeof companyMembers.$inferSelect;
+export type InsertCompanyMember = typeof companyMembers.$inferInsert;

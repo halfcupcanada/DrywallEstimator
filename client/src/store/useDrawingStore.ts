@@ -54,12 +54,14 @@ interface DrawingState {
   updateWall: (id: string, updates: Partial<Wall>) => void;
   deleteWall: (id: string) => void;
   clearWalls: () => void;
+  setWalls: (walls: Wall[]) => void;
 
   // Openings (doors & windows)
   openings: Opening[];
   addOpening: (opening: Omit<Opening, "id">) => void;
   updateOpening: (id: string, updates: Partial<Opening>) => void;
   deleteOpening: (id: string) => void;
+  setOpenings: (openings: Opening[]) => void;
 
   // In-progress wall being drawn
   drawingStart: Point | null;
@@ -117,6 +119,8 @@ export const useDrawingStore = create<DrawingState>((set) => ({
       openings: s.openings.filter((o) => o.wallId !== id),
     })),
   clearWalls: () => set({ walls: [], openings: [], selectedWallId: null }),
+  setWalls: (walls) => set({ walls }),
+  setOpenings: (openings) => set({ openings }),
 
   openings: [],
   addOpening: (opening) =>

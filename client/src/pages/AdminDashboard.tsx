@@ -7,7 +7,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Users, DollarSign, TrendingUp, ArrowLeft } from "lucide-react";
+import { Loader2, Users, DollarSign, TrendingUp, ArrowLeft, Building2 } from "lucide-react";
 import { Link } from "wouter";
 
 function StatusBadge({ status }: { status: string }) {
@@ -83,6 +83,12 @@ export default function AdminDashboard() {
           </Link>
           <span className="text-gray-300">|</span>
           <h1 className="text-lg font-bold text-gray-900">Admin Dashboard</h1>
+          <span className="text-gray-300">|</span>
+          <Link href="/team">
+            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-900">
+              <Building2 size={16} className="mr-1" /> Teams
+            </Button>
+          </Link>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-orange-600 flex items-center justify-center text-white text-xs font-bold">

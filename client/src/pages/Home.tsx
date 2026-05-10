@@ -21,9 +21,10 @@ import ScaleCalibratorDialog, {
   type CalibrationState,
 } from "@/components/ScaleCalibrator";
 import type { Point } from "@/store/useDrawingStore";
-import { Layers, Package, ChevronDown, ChevronUp, LogOut, Settings } from "lucide-react";
+import { Layers, Package, ChevronDown, ChevronUp, LogOut, Settings, FolderOpen, Users } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
+import ProjectsPanel from "@/components/ProjectsPanel";
 
 type MobileTab = "estimate" | "walls";
 
@@ -44,6 +45,7 @@ export default function Home() {
 
   const { setActiveTool, walls } = useDrawingStore();
   const [panelOpen, setPanelOpen] = useState(false);
+  const [projectsPanelOpen, setProjectsPanelOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<MobileTab>("estimate");
 
   // Scale calibration state
@@ -111,6 +113,17 @@ export default function Home() {
         {/* User menu */}
         {isAuthenticated && (
           <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setProjectsPanelOpen(true)}
+              className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-slate-700 transition-colors flex items-center gap-1"
+            >
+              <FolderOpen size={12} /> Projects
+            </button>
+            <Link href="/team">
+              <button className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-slate-700 transition-colors hidden sm:flex items-center gap-1">
+                <Users size={12} /> Team
+              </button>
+            </Link>
             {user?.role === "admin" && (
               <Link href="/admin">
                 <button className="text-slate-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-slate-700 transition-colors flex items-center gap-1">
@@ -237,6 +250,11 @@ export default function Home() {
         secondPoint={calSecondPoint}
         setSecondPoint={setCalSecondPoint}
       />
+
+      {/* ── Projects panel ──────────────────────────────────────────── */}
+      {projectsPanelOpen && (
+        <ProjectsPanel onClose={() => setProjectsPanelOpen(false)} />
+      )}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { calculateEstimate, type SheetSize } from "@/lib/estimate";
 import { wallLength } from "@/lib/snap";
 import { detectRooms } from "@/lib/roomDetect";
 import type { Opening } from "@/store/useDrawingStore";
+import { generateEstimatePDF } from "@/lib/generateEstimatePDF";
 import {
   Layers,
   Package,
@@ -19,6 +20,8 @@ import {
   Home,
   ChevronDown,
   ChevronRight,
+  Download,
+  X,
 } from "lucide-react";
 
 export default function EstimatePanel() {
@@ -35,6 +38,8 @@ export default function EstimatePanel() {
   } = useDrawingStore();
 
   const [expandedRooms, setExpandedRooms] = useState<Set<number>>(new Set());
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportProjectName, setExportProjectName] = useState("");
 
   const rooms = useMemo(() => detectRooms(walls, pxPerFoot), [walls, pxPerFoot]);
 
@@ -265,7 +270,16 @@ export default function EstimatePanel() {
       )}
 
       {/* ── Footer ── */}
-      <div className="px-4 py-2.5 border-t border-slate-200 bg-slate-50 shrink-0">
+      <div className="px-4 py-2.5 border-t border-slate-200 bg-slate-50 shrink-0 space-y-2">
+        {walls.length > 0 && (
+          <button
+            onClick={() => setShowExportDialog(true)}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-colors"
+          >
+            <Download size={13} />
+            Download PDF Report
+          </button>
+        )}
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Layers size={12} />
           <span>{walls.length} wall{walls.length !== 1 ? "s" : ""}</span>
@@ -279,6 +293,68 @@ export default function EstimatePanel() {
           <span>Scale: {pxPerFoot} px/ft</span>
         </div>
       </div>
+
+      {/* ── Export dialog ── */}
+      {showExportDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-2xl w-80 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-slate-800">Download Estimate PDF</h3>
+              <button onClick={() => setShowExportDialog(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={16} />
+              </button>
+            </div>
+            <label className="text-xs text-slate-500 font-medium block mb-1">Project Name</label>
+            <input
+              type="text"
+              value={exportProjectName}
+              onChange={(e) => setExportProjectName(e.target.value)}
+              placeholder="e.g. 123 Main St — Master Bedroom"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  generateEstimatePDF({
+                    projectName: exportProjectName || "Untitled Project",
+                    sheetSize,
+                    wasteFactor,
+                    defaultWallHeight: 9,
+                    walls,
+                    openings: openings ?? [],
+                    pxPerFoot,
+                  });
+                  setShowExportDialog(false);
+                }
+              }}
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowExportDialog(false)}
+                className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  generateEstimatePDF({
+                    projectName: exportProjectName || "Untitled Project",
+                    sheetSize,
+                    wasteFactor,
+                    defaultWallHeight: 9,
+                    walls,
+                    openings: openings ?? [],
+                    pxPerFoot,
+                  });
+                  setShowExportDialog(false);
+                }}
+                className="flex-1 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

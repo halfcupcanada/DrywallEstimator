@@ -15,6 +15,13 @@
       "when": 1778421407376,
       "tag": "0001_great_nekra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1778422638801,
+      "tag": "0002_lumpy_mentor",
+      "breakpoints": true
     }
   ]
 }

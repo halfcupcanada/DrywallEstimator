@@ -7,6 +7,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Landing from "./pages/Landing";
 import AppShell from "./pages/AppShell";
 import AdminDashboard from "./pages/AdminDashboard";
+import TeamPage from "./pages/TeamPage";
+import JoinPage from "./pages/JoinPage";
 
 function Router() {
   return (
@@ -17,6 +19,10 @@ function Router() {
       <Route path={"/app"} component={AppShell} />
       {/* Admin-only dashboard */}
       <Route path={"/admin"} component={AdminDashboard} />
+      {/* Team management */}
+      <Route path={"/team"} component={TeamPage} />
+      {/* Invite accept */}
+      <Route path={"/join"} component={JoinPage} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
