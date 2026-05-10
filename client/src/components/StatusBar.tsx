@@ -42,7 +42,7 @@ export default function StatusBar() {
       <span className="text-slate-600 hidden md:inline">|</span>
       <span className="flex-1 truncate hidden md:inline">{hint()}</span>
       <span className="text-slate-600 hidden lg:inline">|</span>
-      <span className="whitespace-nowrap hidden lg:inline text-slate-500">Scroll=zoom · Mid-drag=pan · S/W/P=tools · Esc=cancel</span>
+      <span className="whitespace-nowrap hidden lg:inline text-slate-500">Click or drag to draw · Shift=ortho · Dbl-click=end chain · Scroll=zoom · Esc=cancel</span>
     </footer>
   );
 }
