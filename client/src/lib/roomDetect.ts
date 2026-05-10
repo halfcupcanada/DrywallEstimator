@@ -1,15 +1,22 @@
 /**
  * Room (closed loop) detection for the wall graph.
  *
- * A "room" is a set of walls whose endpoints chain together to form a closed polygon.
- * We build an adjacency graph from wall endpoints (snapping points within CLOSE_THRESHOLD),
- * then find simple cycles.
+ * Strategy:
+ * 1. Build a node graph from wall endpoints (merge endpoints within CLOSE_THRESHOLD).
+ * 2. Find ALL simple cycles via DFS.
+ * 3. Filter out sub-cycles: if cycle A's node set is a strict subset of cycle B's node set,
+ *    discard A (it is a sub-polygon of B).
+ * 4. Among remaining cycles, keep only the one with the LARGEST area per connected component.
+ *    This prevents the "3 walls shown when 4 walls form a rectangle" problem where the DFS
+ *    finds a shortcut path through 3 of the 4 nodes.
+ *
+ * Result: one Room per distinct closed region, always the outermost polygon.
  */
 import type { Wall, Point } from "@/store/useDrawingStore";
 import { wallLength } from "./snap";
 
 /** Two endpoints are considered the same node if within this many canvas pixels */
-const CLOSE_THRESHOLD = 6;
+const CLOSE_THRESHOLD = 8;
 
 export interface Room {
   /** Ordered polygon vertices */
@@ -42,14 +49,20 @@ function polygonArea(pts: Point[]): number {
   return Math.abs(area) / 2;
 }
 
+/** Canonical key for a cycle: sorted node indices joined */
+function cycleKey(nodes: number[]): string {
+  return [...nodes].sort((a, b) => a - b).join(",");
+}
+
 /**
- * Detect all closed rooms in the wall set.
- * Returns an array of Room objects (may be empty if no closed loops exist).
+ * Detect closed rooms in the wall set.
+ * Returns one Room per distinct closed region (the largest polygon per component).
  */
 export function detectRooms(walls: Wall[], pxPerFoot: number): Room[] {
   if (walls.length < 3) return [];
 
-  // Build node list — merge endpoints that are within CLOSE_THRESHOLD
+  // ── 1. Build node graph ───────────────────────────────────────────────────
+
   const nodes: Point[] = [];
   const nodeOf = (pt: Point): number => {
     for (let i = 0; i < nodes.length; i++) {
@@ -59,7 +72,7 @@ export function detectRooms(walls: Wall[], pxPerFoot: number): Room[] {
     return nodes.length - 1;
   };
 
-  // Build adjacency: nodeIndex → [{nodeIndex, wallId}]
+  // adj: nodeIndex → [{to, wallId}]
   const adj: Map<number, { to: number; wallId: string }[]> = new Map();
   const addEdge = (a: number, b: number, wallId: string) => {
     if (!adj.has(a)) adj.set(a, []);
@@ -74,17 +87,24 @@ export function detectRooms(walls: Wall[], pxPerFoot: number): Room[] {
     if (a !== b) addEdge(a, b, wall.id);
   }
 
-  // Find all nodes with degree >= 2 (potential room corners)
+  // Only nodes with degree ≥ 2 can be part of a cycle
   const validNodes = new Set<number>();
   for (const [node, edges] of Array.from(adj.entries())) {
     if (edges.length >= 2) validNodes.add(node);
   }
-
   if (validNodes.size < 3) return [];
 
-  // DFS to find shortest simple cycles (rooms)
-  const rooms: Room[] = [];
-  const foundCycles = new Set<string>();
+  // ── 2. DFS: collect ALL simple cycles ────────────────────────────────────
+
+  interface CycleRecord {
+    nodeSet: Set<number>;
+    nodeList: number[];
+    wallIds: string[];
+    areaPx2: number;
+  }
+
+  const allCycles: CycleRecord[] = [];
+  const seenKeys = new Set<string>();
 
   const dfs = (
     start: number,
@@ -95,23 +115,23 @@ export function detectRooms(walls: Wall[], pxPerFoot: number): Room[] {
   ) => {
     const edges = adj.get(current) ?? [];
     for (const { to, wallId } of edges) {
-      // Found a cycle back to start
       if (to === start && path.length >= 3) {
-        const cycle = [...path];
-        // Canonical key: sort node indices
-        const key = [...cycle].sort((a, b) => a - b).join(",");
-        if (!foundCycles.has(key)) {
-          foundCycles.add(key);
-          const vertices = cycle.map((n) => nodes[n]);
-          const wallIds = [...wallPath];
-          rooms.push(buildRoom(vertices, wallIds, walls, pxPerFoot));
+        const key = cycleKey(path);
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          const verts = path.map((n) => nodes[n]);
+          allCycles.push({
+            nodeSet: new Set(path),
+            nodeList: [...path],
+            wallIds: [...wallPath],
+            areaPx2: polygonArea(verts),
+          });
         }
         continue;
       }
       if (visited.has(to)) continue;
       if (!validNodes.has(to)) continue;
-      // Limit cycle length to avoid exponential blowup
-      if (path.length > 12) continue;
+      if (path.length > 14) continue; // safety cap
       visited.add(to);
       dfs(start, to, [...path, to], [...wallPath, wallId], visited);
       visited.delete(to);
@@ -123,7 +143,62 @@ export function detectRooms(walls: Wall[], pxPerFoot: number): Room[] {
     dfs(start, start, [start], [], visited);
   }
 
-  // Return unique rooms sorted by floor area descending
+  if (allCycles.length === 0) return [];
+
+  // ── 3. Remove sub-cycles ──────────────────────────────────────────────────
+  // A cycle is a sub-cycle if its node set is a strict subset of another cycle's node set.
+
+  const isSubCycle = (c: CycleRecord): boolean => {
+    for (const other of allCycles) {
+      if (other === c) continue;
+      if (other.nodeSet.size <= c.nodeSet.size) continue;
+      let allIn = true;
+      for (const n of Array.from(c.nodeSet)) {
+        if (!other.nodeSet.has(n)) { allIn = false; break; }
+      }
+      if (allIn) return true;
+    }
+    return false;
+  };
+
+  const topCycles = allCycles.filter((c) => !isSubCycle(c));
+
+  // ── 4. Per connected component: keep only the largest-area cycle ──────────
+  // Two cycles belong to the same component if they share any node.
+
+  const components: CycleRecord[][] = [];
+  const assigned = new Set<number>(); // index into topCycles
+
+  for (let i = 0; i < topCycles.length; i++) {
+    if (assigned.has(i)) continue;
+    const comp: CycleRecord[] = [topCycles[i]];
+    assigned.add(i);
+    for (let j = i + 1; j < topCycles.length; j++) {
+      if (assigned.has(j)) continue;
+      // Check if they share a node
+      let shared = false;
+      for (const n of Array.from(topCycles[i].nodeSet)) {
+        if (topCycles[j].nodeSet.has(n)) { shared = true; break; }
+      }
+      if (shared) {
+        comp.push(topCycles[j]);
+        assigned.add(j);
+      }
+    }
+    components.push(comp);
+  }
+
+  // From each component pick the cycle with the largest area
+  const bestCycles = components.map((comp) =>
+    comp.reduce((best, c) => (c.areaPx2 > best.areaPx2 ? c : best))
+  );
+
+  // ── 5. Build Room objects ─────────────────────────────────────────────────
+
+  const rooms: Room[] = bestCycles.map((c) =>
+    buildRoom(c.nodeList.map((n) => nodes[n]), c.wallIds, walls, pxPerFoot)
+  );
+
   return rooms.sort((a, b) => b.floorAreaFt2 - a.floorAreaFt2);
 }
 
