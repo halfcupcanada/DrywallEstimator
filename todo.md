@@ -53,6 +53,7 @@
 
 ## Source Control
 - [x] Push the current DrywallEstimator codebase to a repository under the halfcupcanada GitHub account
+- [x] Push the external deployment documentation update to halfcupcanada/DrywallEstimator
 
 ## External Deployment
 - [x] Document the required environment variables and service setup for running DrywallPro outside Manus
